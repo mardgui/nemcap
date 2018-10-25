@@ -160,14 +160,25 @@ def read_instance_file(filename):
     return grid_init, nsharp
 
 
+def manhattan_distance(pos1, pos2):
+    (x1, y1) = pos1
+    (x2, y2) = pos2
+
+    return abs(x2 - x1) + abs(y2 - y1)
+
+
 ######################
-# Heuristic function #
+# Heuristic functions #
 ######################
-def heuristic(node):
+def h1(node):
+    return node.state.foods_left
+
+
+def h2(node):
     h = 0.0
-    # ...
-    # compute an heuristic value
-    # ...
+    for pacman in node.state.pacmen:
+        for food in node.state.foods:
+            h += manhattan_distance(pacman, food)
     return h
 
 
@@ -179,7 +190,7 @@ init_state = State(grid_init)
 
 problem = Pacmen(init_state)
 
-node = astar_graph_search(problem, heuristic)
+node = astar_graph_search(problem, h1)
 
 # example of print
 path = node.path()
