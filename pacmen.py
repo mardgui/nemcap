@@ -15,10 +15,34 @@ class Pacmen(Problem):
 
     def successor(self, state):
         self.nb_explored_nodes += 1
-        pass
+        i = 0
+        for pacman in state.pacmen:
+            (x, y) = pacman
+
+            if x > 0 and state.grid[x - 1][y] in {' ', '@'}:
+                new_state = state.clone()
+                new_state.move(i, 'up')
+                yield ('up', new_state)
+
+            if x + 1 < state.nbr and state.grid[x + 1][y] in {' ', '@'}:
+                new_state = state.clone()
+                new_state.move(i, 'down')
+                yield ('down', new_state)
+
+            if y + 1 < state.nbc and state.grid[x][y + 1] in {' ', '@'}:
+                new_state = state.clone()
+                new_state.move(i, 'right')
+                yield ('right', new_state)
+
+            if y > 0 and state.grid[x][y - 1] in {' ', '@'}:
+                new_state = state.clone()
+                new_state.move(i, 'left')
+                yield ('left', new_state)
+
+            i += 1
 
     def goal_test(self, state):
-        pass
+        return state.foods_left == 0
 
 
 ###############
@@ -80,6 +104,44 @@ class State:
                 elif tile == '@':
                     self.foods.append((i, j))
                     self.foods_left += 1
+
+    def move(self, pacman, direction):
+        """Move modifies the grid according to the chosen pacman and direction.
+           The chosen pacman is moved and replaced by a space.
+           The variables self.pacmen, self.foods and self.foods_left are updated if needed."""
+        (x, y) = self.pacmen[pacman]
+        self.grid[x][y] = ' '
+
+        if direction == 'left':
+            if self.grid[x][y - 1] == '@':
+                self.foods_left -= 1
+                self.foods.remove((x, y - 1))
+            self.grid[x][y - 1] = '$'
+            self.pacmen[pacman] = (x, y - 1)
+
+        elif direction == 'right':
+            if self.grid[x][y + 1] == '@':
+                self.foods_left -= 1
+                self.foods.remove((x, y + 1))
+            self.grid[x][y + 1] = '$'
+            self.pacmen[pacman] = (x, y + 1)
+
+        elif direction == 'up':
+            if self.grid[x - 1][y] == '@':
+                self.foods_left -= 1
+                self.foods.remove((x - 1, y))
+            self.grid[x - 1][y] = '$'
+            self.pacmen[pacman] = (x - 1, y)
+
+        elif direction == 'down':
+            if self.grid[x + 1][y] == '@':
+                self.foods_left -= 1
+                self.foods.remove((x + 1, y))
+            self.grid[x + 1][y] = '$'
+            self.pacmen[pacman] = (x + 1, y)
+
+        else:
+            raise ValueError('Impossible to move in this direction.')
 
 
 ######################
