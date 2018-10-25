@@ -185,18 +185,19 @@ def h2(node):
 #####################
 # Launch the search #
 #####################
-grid_init, nsharp = read_instance_file(sys.argv[1])
-init_state = State(grid_init)
+if __name__ == "__main__":
+    grid_init, nsharp = read_instance_file(sys.argv[1])
+    init_state = State(grid_init)
 
-problem = Pacmen(init_state)
+    problem = Pacmen(init_state)
 
-node = astar_graph_search(problem, h1)
+    node = astar_graph_search(problem, h2)
 
-# example of print
-path = node.path()
-path.reverse()
+    # example of print
+    path = node.path()
+    path.reverse()
 
-print('Number of moves: ' + str(node.depth))
-for n in path:
-    print(n.state)  # assuming that the __str__ function of state outputs the correct format
-    print()
+    print('Number of moves: ' + str(node.depth))
+    for n in path:
+        print(n.state)  # assuming that the __str__ function of state outputs the correct format
+        print()
