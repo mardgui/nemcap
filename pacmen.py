@@ -15,31 +15,51 @@ class Pacmen(Problem):
 
     def successor(self, state):
         self.nb_explored_nodes += 1
-        i = 0
-        for pacman in state.pacmen:
-            (x, y) = pacman
+
+        new_state = state.clone()
+        actions = []
+
+        def aux(state, actions):
+            pacman = len(actions)
+            (x, y) = state.pacmen[pacman]
 
             if x > 0 and state.grid[x - 1][y] in {' ', '@'}:
                 new_state = state.clone()
-                new_state.move(i, 'up')
-                yield ('up', new_state)
+                new_state.move(pacman, 'up')
+                new_actions = actions + ['up', ]
+                if pacman == len(state.pacmen) - 1:
+                    yield (new_actions, new_state)
+                else:
+                    yield from aux(new_state, new_actions)
 
             if x + 1 < state.nbr and state.grid[x + 1][y] in {' ', '@'}:
                 new_state = state.clone()
-                new_state.move(i, 'down')
-                yield ('down', new_state)
+                new_state.move(pacman, 'down')
+                new_actions = actions + ['down', ]
+                if pacman == len(state.pacmen) - 1:
+                    yield (new_actions, new_state)
+                else:
+                    yield from aux(new_state, new_actions)
 
             if y + 1 < state.nbc and state.grid[x][y + 1] in {' ', '@'}:
                 new_state = state.clone()
-                new_state.move(i, 'right')
-                yield ('right', new_state)
+                new_state.move(pacman, 'right')
+                new_actions = actions + ['right', ]
+                if pacman == len(state.pacmen) - 1:
+                    yield (new_actions, new_state)
+                else:
+                    yield from aux(new_state, new_actions)
 
             if y > 0 and state.grid[x][y - 1] in {' ', '@'}:
                 new_state = state.clone()
-                new_state.move(i, 'left')
-                yield ('left', new_state)
+                new_state.move(pacman, 'left')
+                new_actions = actions + ['right', ]
+                if pacman == len(state.pacmen) - 1:
+                    yield (new_actions, new_state)
+                else:
+                    yield from aux(new_state, new_actions)
 
-            i += 1
+        yield from aux(new_state, actions)
 
     def goal_test(self, state):
         return state.foods_left == 0

@@ -31,9 +31,9 @@ def exp(filepath, heuristic):
     path.reverse()
 
     print('\tNumber of moves: ' + str(node.depth))
-    for n in path:
-        print(n.state)  # assuming that the __str__ function of state outputs the correct format
-        print()
+    # for n in path:
+    #     print(n.state)  # assuming that the __str__ function of state outputs the correct format
+    #     print()
 
 
 if __name__ == "__main__":
