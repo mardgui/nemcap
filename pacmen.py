@@ -27,7 +27,7 @@ class State:
     def __str__(self):
         s = ""
         for a in range(nsharp):
-            s = s+"#"
+            s = s + "#"
         s = s + '\n'
         for i in range(0, self.nbr):
             s = s + "# "
@@ -37,28 +37,27 @@ class State:
             if i < self.nbr:
                 s = s + '\n'
         for a in range(nsharp):
-            s = s+"#"
+            s = s + "#"
         return s
 
-    def __eq__(self, other_state):
-        pass
+    def __eq__(self, o) -> bool:
+        return self.grid.__eq__(o.grid)
 
-    def __hash__(self):
-        pass
-
+    def __hash__(self) -> int:
+        return self.grid.__hash__()
 
 
 ######################
 # Auxiliary function #
 ######################
-def readInstanceFile(filename):
+def read_instance_file(filename):
     lines = [[char for char in line.rstrip('\n')[1:][:-1]] for line in open(filename)]
     nsharp = len(lines[0]) + 2
-    lines = lines[1:len(lines)-1]
+    lines = lines[1:len(lines) - 1]
     n = len(lines)
     m = len(lines[0])
     grid_init = [[lines[i][j] for j in range(1, m, 2)] for i in range(0, n)]
-    return grid_init,nsharp
+    return grid_init, nsharp
 
 
 ######################
@@ -75,12 +74,12 @@ def heuristic(node):
 #####################
 # Launch the search #
 #####################
-grid_init,nsharp = readInstanceFile(sys.argv[1])
+grid_init, nsharp = read_instance_file(sys.argv[1])
 init_state = State(grid_init)
 
 problem = Pacmen(init_state)
 
-node = astar_graph_search(problem,h)
+node = astar_graph_search(problem, heuristic)
 
 # example of print
 path = node.path()
