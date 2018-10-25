@@ -77,11 +77,14 @@ class State:
             s = s + "#"
         return s
 
-    def __eq__(self, o) -> bool:
-        return self.grid.__eq__(o.grid)
+    def __eq__(self, o):
+        return self.grid == o.grid
 
-    def __hash__(self) -> int:
-        return self.grid.__hash__()
+    def __hash__(self):
+        hashable_grid = []
+        for i in range(0, self.nbr):
+            hashable_grid.append(tuple(self.grid[i]))
+        return hash(tuple(hashable_grid))
 
     def clone(self):
         """Clone method of State, allowing a deep copy of the state class."""
