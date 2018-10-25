@@ -49,10 +49,11 @@ class Pacmen(Problem):
 # State class #
 ###############
 class State:
-    def __init__(self, grid):
+    def __init__(self, grid, nsharp):
         self.nbr = len(grid)
         self.nbc = len(grid[0])
         self.grid = grid
+        self.nsharp = nsharp
 
         # Positions of the pacmen
         self.pacmen = []
@@ -63,7 +64,7 @@ class State:
 
     def __str__(self):
         s = ""
-        for a in range(nsharp):
+        for a in range(self.nsharp):
             s = s + "#"
         s = s + '\n'
         for i in range(0, self.nbr):
@@ -73,7 +74,7 @@ class State:
             s = s + "#"
             if i < self.nbr:
                 s = s + '\n'
-        for a in range(nsharp):
+        for a in range(self.nsharp):
             s = s + "#"
         return s
 
@@ -91,7 +92,7 @@ class State:
         new_grid = [[0 for i in range(self.nbc)] for j in range(self.nbr)]
         for i in range(0, self.nbr):
             new_grid[i] = list(self.grid[i])
-        new_state = State(new_grid)
+        new_state = State(new_grid, self.nsharp)
         new_state.pacmen = list(self.pacmen)
         new_state.foods = list(self.foods)
         new_state.foods_left = self.foods_left
@@ -170,6 +171,10 @@ def manhattan_distance(pos1, pos2):
 ######################
 # Heuristic functions #
 ######################
+def h0(node):
+    return 0.0
+
+
 def h1(node):
     return node.state.foods_left
 
@@ -187,7 +192,7 @@ def h2(node):
 #####################
 if __name__ == "__main__":
     grid_init, nsharp = read_instance_file(sys.argv[1])
-    init_state = State(grid_init)
+    init_state = State(grid_init, nsharp)
 
     problem = Pacmen(init_state)
 

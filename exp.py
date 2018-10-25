@@ -13,20 +13,15 @@ import time
 import os
 
 
-def exp(filepath, search_mode):
+def exp(filepath, heuristic):
     grid_init, nsharp = read_instance_file(filepath)
-    init_state = State(grid_init)
+    init_state = State(grid_init, nsharp)
 
     start_time = time.time()
 
     problem = Pacmen(init_state)
 
-    if search_mode == "h1":
-        node = astar_graph_search(problem, h1)
-    elif search_mode == "h2":
-        node = astar_graph_search(problem, h2)
-    else:
-        raise ValueError("This search mode does not exist!")
+    node = astar_graph_search(problem, heuristic)
 
     interval = time.time() - start_time
     print('\tTime : ' + str(interval))
@@ -36,14 +31,17 @@ def exp(filepath, search_mode):
     path.reverse()
 
     print('\tNumber of moves: ' + str(node.depth))
+    for n in path:
+        print(n.state)  # assuming that the __str__ function of state outputs the correct format
+        print()
 
 
 if __name__ == "__main__":
-    heuristics = ["h1", "h2"]
+    heuristics = [h0, h1, h2]
     print("Experiment with all instances and all uninformed search algorithms.")
 
     for instance in os.listdir("instances"):
         print("\n\nInstance " + instance + " :")
         for heuristic in heuristics:
-            print("\n" + heuristic)
+            print("\n" + str(heuristic))
             exp("instances/" + instance, heuristic)
