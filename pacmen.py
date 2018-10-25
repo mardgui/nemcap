@@ -203,7 +203,7 @@ def h2(node):
     h = 0.0
     for pacman in node.state.pacmen:
         for food in node.state.foods:
-            h += manhattan_distance(pacman, food)
+            h += (manhattan_distance(pacman, food) ** 0.5 - 1.5)
     return h
 
 
