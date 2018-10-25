@@ -8,7 +8,13 @@ from search import *
 #################
 class Pacmen(Problem):
 
+    def __init__(self, initial):
+        super().__init__(initial)
+        self.initial.initial_scan()
+        self.nb_explored_nodes = 0
+
     def successor(self, state):
+        self.nb_explored_nodes += 1
         pass
 
     def goal_test(self, state):
@@ -23,6 +29,13 @@ class State:
         self.nbr = len(grid)
         self.nbc = len(grid[0])
         self.grid = grid
+
+        # Positions of the pacmen
+        self.pacmen = []
+        # Positions of the foods
+        self.foods = []
+        # Number of foods remaining
+        self.foods_left = 0
 
     def __str__(self):
         s = ""
@@ -45,6 +58,28 @@ class State:
 
     def __hash__(self) -> int:
         return self.grid.__hash__()
+
+    def clone(self):
+        """Clone method of State, allowing a deep copy of the state class."""
+        new_grid = [[0 for i in range(self.nbc)] for j in range(self.nbr)]
+        for i in range(0, self.nbr):
+            new_grid[i] = list(self.grid[i])
+        new_state = State(new_grid)
+        new_state.pacmen = list(self.pacmen)
+        new_state.foods = list(self.foods)
+        new_state.foods_left = self.foods_left
+        return new_state
+
+    def initial_scan(self):
+        """Initial_scan scans the grid and stores the position of the pacmen and the foods in the appropriate fields"""
+        for i in range(0, self.nbr):
+            for j in range(0, self.nbc):
+                tile = self.grid[i][j]
+                if tile == '$':
+                    self.pacmen.append((i, j))
+                elif tile == '@':
+                    self.foods.append((i, j))
+                    self.foods_left += 1
 
 
 ######################
