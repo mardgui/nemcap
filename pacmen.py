@@ -1,5 +1,6 @@
 # -*-coding: utf-8 -*
-'''NAMES OF THE AUTHOR(S): Gael Aglin <gael.aglin@uclouvain.be>, Francois Aubry <francois.aubry@uclouvain.be>'''
+"""NAMES OF THE AUTHOR(S): Gael Aglin <gael.aglin@uclouvain.be>, Francois Aubry <francois.aubry@uclouvain.be>,
+   Simon Calbert <simon.calbert@student.uclouvain.be, Quentin Guimard <quentin.guimard@student.uclouvain.be>"""
 from search import *
 
 
@@ -20,10 +21,12 @@ class Pacmen(Problem):
         actions = []
 
         def aux(state, actions):
+            """Recursive function that will return all the possible combinations of moves,
+               according to the number of pacmen"""
             pacman = len(actions)
             (x, y) = state.pacmen[pacman]
 
-            if x > 0 and state.grid[x - 1][y] in {' ', '@','$'}:
+            if x > 0 and state.grid[x - 1][y] in {' ', '@', '$'}:
                 new_state = state.clone()
                 new_state.move(pacman, 'up')
                 new_actions = actions + ['up', ]
@@ -32,7 +35,7 @@ class Pacmen(Problem):
                 else:
                     yield from aux(new_state, new_actions)
 
-            if x + 1 < state.nbr and state.grid[x + 1][y] in {' ', '@','$'}:
+            if x + 1 < state.nbr and state.grid[x + 1][y] in {' ', '@', '$'}:
                 new_state = state.clone()
                 new_state.move(pacman, 'down')
                 new_actions = actions + ['down', ]
@@ -41,7 +44,7 @@ class Pacmen(Problem):
                 else:
                     yield from aux(new_state, new_actions)
 
-            if y + 1 < state.nbc and state.grid[x][y + 1] in {' ', '@','$'}:
+            if y + 1 < state.nbc and state.grid[x][y + 1] in {' ', '@', '$'}:
                 new_state = state.clone()
                 new_state.move(pacman, 'right')
                 new_actions = actions + ['right', ]
@@ -50,7 +53,7 @@ class Pacmen(Problem):
                 else:
                     yield from aux(new_state, new_actions)
 
-            if y > 0 and state.grid[x][y - 1] in {' ', '@','$'}:
+            if y > 0 and state.grid[x][y - 1] in {' ', '@', '$'}:
                 new_state = state.clone()
                 new_state.move(pacman, 'left')
                 new_actions = actions + ['right', ]
@@ -169,7 +172,7 @@ class State:
 
 
 ######################
-# Auxiliary function #
+# Auxiliary functions #
 ######################
 def read_instance_file(filename):
     lines = [[char for char in line.rstrip('\n')[1:][:-1]] for line in open(filename)]
@@ -188,92 +191,97 @@ def manhattan_distance(pos1, pos2):
     return abs(x2 - x1) + abs(y2 - y1)
 
 
-######################
-# Heuristic functions #
-######################
-def h0(node):
-    return 0.0
-
-
-def h1(node):
-    return node.state.foods_left
-
-
-def h2(node):
-    h = 0.0
-    for pacman in node.state.pacmen:
-        for food in node.state.foods:
-            h += (manhattan_distance(pacman, food) ** 0.5 - 1.5)
-    return h
-
-def adj(grid,v):
+def adj(grid, v):
     nbr = len(grid)
     nbc = len(grid[0])
     x = v[0]
     y = v[1]
     neig = []
-    if x > 0 and grid[x - 1][y] in {' ', '@','$'}:
-        neig.append((x-1,y))
-    if x + 1 < nbr and grid[x + 1][y] in {' ', '@','$'}:
-        neig.append((x+1,y))
-    if y + 1 < nbc and grid[x][y + 1] in {' ', '@','$'}:
-        neig.append((x,y+1))
-    if y > 0 and grid[x][y - 1] in {' ', '@','$'}:
-        neig.append((x,y-1))
+    if x > 0 and grid[x - 1][y] in {' ', '@', '$'}:
+        neig.append((x - 1, y))
+    if x + 1 < nbr and grid[x + 1][y] in {' ', '@', '$'}:
+        neig.append((x + 1, y))
+    if y + 1 < nbc and grid[x][y + 1] in {' ', '@', '$'}:
+        neig.append((x, y + 1))
+    if y > 0 and grid[x][y - 1] in {' ', '@', '$'}:
+        neig.append((x, y - 1))
     return neig
 
-def bfs_matrix(grid,pacman,goal):
+
+def bfs_matrix(grid, pacman, goal):
     nbr = len(grid)
     nbc = len(grid[0])
     dist = [[0 for i in range(nbc)] for j in range(nbr)]
     marked = [[False for i in range(nbc)] for j in range(nbr)]
+
     def bfs(grid):
         queue = []
         marked[pacman[0]][pacman[1]] = True
         queue.append(pacman)
-        while(len(queue) != 0):
+        while len(queue) != 0:
             v = queue.pop(0)
-            for w in adj(grid,v):
-                if marked[w[0]][w[1]] != True:
-                    dist[w[0]][w[1]] = dist[v[0]][v[1]]+1
-                    if(grid[w[0]][w[1]] in goal):
-                        return dist[w[0]][w[1]],(w[0],w[1])
+            for w in adj(grid, v):
+                if not marked[w[0]][w[1]]:
+                    dist[w[0]][w[1]] = dist[v[0]][v[1]] + 1
+                    if grid[w[0]][w[1]] in goal:
+                        return dist[w[0]][w[1]], (w[0], w[1])
                     marked[w[0]][w[1]] = True
                     queue.append(w)
+
     return bfs(grid)
 
-def h4(node): # consistent
+
+######################
+# Heuristic functions #
+######################
+def h0(node):  # Test heuristic, equivalent to BFSg
+    return 0.0
+
+
+def h1(node):  # Simplest consistent heuristic
+    return node.state.foods_left
+
+
+def h2(node):  # Very bad heuristic
+    h = 0.0
+    for pacman in node.state.pacmen:
+        for food in node.state.foods:
+            h += manhattan_distance(pacman, food)
+    return h
+
+
+def h4(node):  # Consistent heuristic
     if node.state.foods_left == 0:
         return 0.0
-    h = 0.0
     max_dist_food = 0
     for food in node.state.foods:
-        dist,elem = bfs_matrix(node.state.grid,food,['$'])
+        dist, elem = bfs_matrix(node.state.grid, food, ['$'])
         if dist > max_dist_food:
             max_dist_food = dist
     h = max_dist_food
     return h
 
-def h5(node): # NON consistent
+
+def h5(node):  # Consistent heuristic
     if node.state.foods_left == 0:
         return 0.0
     h = 0.0
     for food in node.state.foods:
-        dist,elem = bfs_matrix(node.state.grid,food,['$'])
-        h+=dist
-   # print(h)
+        dist, elem = bfs_matrix(node.state.grid, food, ['$'])
+        h += dist
+    # print(h)
     return h
 
-def h6(node):# NON consistent mais tres efficace
+
+def h6(node):  # Non-consistent heuristic, yet very efficient
     if node.state.foods_left == 0:
         return 0.0
     h = 0.0
     for food in node.state.foods:
-        dist,elem = bfs_matrix(node.state.grid,food,['$','@'])
-        h+=dist
-    #print(h)
+        dist, elem = bfs_matrix(node.state.grid, food, ['$', '@'])
+        h += dist
+    # print(h)
     return h
-
 
 
 #####################
@@ -291,10 +299,10 @@ if __name__ == "__main__":
     path = node.path()
     path.reverse()
     ###############
-    #print(problem.nb_explored_nodes)
+    # print(problem.nb_explored_nodes)
     ################
     print('Number of moves: ' + str(node.depth))
     for n in path:
-        #print(h6(n))
+        # print(h6(n))
         print(n.state)  # assuming that the __str__ function of state outputs the correct format
         print()
