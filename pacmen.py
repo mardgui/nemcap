@@ -185,6 +185,7 @@ def read_instance_file(filename):
 
 
 def manhattan_distance(pos1, pos2):
+    """Calculates the manhattan distance between two positions"""
     (x1, y1) = pos1
     (x2, y2) = pos2
 
@@ -192,6 +193,7 @@ def manhattan_distance(pos1, pos2):
 
 
 def adj(grid, v):
+    """Returns the adjacent tiles on which a pacman can move"""
     nbr = len(grid)
     nbc = len(grid[0])
     x = v[0]
@@ -209,6 +211,8 @@ def adj(grid, v):
 
 
 def bfs_matrix(grid, pacman, goal):
+    """Performs a BFS in the grid from pacman (position) to a given goal (character)
+       It returns the distance to shortest goal found, as well as its position"""
     nbr = len(grid)
     nbc = len(grid[0])
     dist = [[0 for i in range(nbc)] for j in range(nbr)]
@@ -262,25 +266,23 @@ def h4(node):  # Consistent heuristic
     return h
 
 
-def h5(node):  # Consistent heuristic
+def h5(node):  # Consistent heuristic for 1 pacman, but inconsistent for more than 1
     if node.state.foods_left == 0:
         return 0.0
     h = 0.0
     for food in node.state.foods:
         dist, elem = bfs_matrix(node.state.grid, food, ['$'])
         h += dist
-    # print(h)
     return h
 
 
-def h6(node):  # Non-consistent heuristic, yet very efficient
+def h6(node):  # Inconsistent heuristic, yet very efficient
     if node.state.foods_left == 0:
         return 0.0
     h = 0.0
     for food in node.state.foods:
         dist, elem = bfs_matrix(node.state.grid, food, ['$', '@'])
         h += dist
-    # print(h)
     return h
 
 
@@ -298,11 +300,8 @@ if __name__ == "__main__":
     # example of print
     path = node.path()
     path.reverse()
-    ###############
-    # print(problem.nb_explored_nodes)
-    ################
+
     print('Number of moves: ' + str(node.depth))
     for n in path:
-        # print(h6(n))
         print(n.state)  # assuming that the __str__ function of state outputs the correct format
         print()
