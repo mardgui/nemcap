@@ -23,7 +23,7 @@ class Pacmen(Problem):
             pacman = len(actions)
             (x, y) = state.pacmen[pacman]
 
-            if x > 0 and state.grid[x - 1][y] in {' ', '@'}:
+            if x > 0 and state.grid[x - 1][y] in {' ', '@','$'}:
                 new_state = state.clone()
                 new_state.move(pacman, 'up')
                 new_actions = actions + ['up', ]
@@ -32,7 +32,7 @@ class Pacmen(Problem):
                 else:
                     yield from aux(new_state, new_actions)
 
-            if x + 1 < state.nbr and state.grid[x + 1][y] in {' ', '@'}:
+            if x + 1 < state.nbr and state.grid[x + 1][y] in {' ', '@','$'}:
                 new_state = state.clone()
                 new_state.move(pacman, 'down')
                 new_actions = actions + ['down', ]
@@ -41,7 +41,7 @@ class Pacmen(Problem):
                 else:
                     yield from aux(new_state, new_actions)
 
-            if y + 1 < state.nbc and state.grid[x][y + 1] in {' ', '@'}:
+            if y + 1 < state.nbc and state.grid[x][y + 1] in {' ', '@','$'}:
                 new_state = state.clone()
                 new_state.move(pacman, 'right')
                 new_actions = actions + ['right', ]
@@ -50,7 +50,7 @@ class Pacmen(Problem):
                 else:
                     yield from aux(new_state, new_actions)
 
-            if y > 0 and state.grid[x][y - 1] in {' ', '@'}:
+            if y > 0 and state.grid[x][y - 1] in {' ', '@','$'}:
                 new_state = state.clone()
                 new_state.move(pacman, 'left')
                 new_actions = actions + ['right', ]
@@ -206,6 +206,75 @@ def h2(node):
             h += (manhattan_distance(pacman, food) ** 0.5 - 1.5)
     return h
 
+def adj(grid,v):
+    nbr = len(grid)
+    nbc = len(grid[0])
+    x = v[0]
+    y = v[1]
+    neig = []
+    if x > 0 and grid[x - 1][y] in {' ', '@','$'}:
+        neig.append((x-1,y))
+    if x + 1 < nbr and grid[x + 1][y] in {' ', '@','$'}:
+        neig.append((x+1,y))
+    if y + 1 < nbc and grid[x][y + 1] in {' ', '@','$'}:
+        neig.append((x,y+1))
+    if y > 0 and grid[x][y - 1] in {' ', '@','$'}:
+        neig.append((x,y-1))
+    return neig
+
+def bfs_matrix(grid,pacman,goal):
+    nbr = len(grid)
+    nbc = len(grid[0])
+    dist = [[0 for i in range(nbc)] for j in range(nbr)]
+    marked = [[False for i in range(nbc)] for j in range(nbr)]
+    def bfs(grid):
+        queue = []
+        marked[pacman[0]][pacman[1]] = True
+        queue.append(pacman)
+        while(len(queue) != 0):
+            v = queue.pop(0)
+            for w in adj(grid,v):
+                if marked[w[0]][w[1]] != True:
+                    dist[w[0]][w[1]] = dist[v[0]][v[1]]+1
+                    if(grid[w[0]][w[1]] in goal):
+                        return dist[w[0]][w[1]],(w[0],w[1])
+                    marked[w[0]][w[1]] = True
+                    queue.append(w)
+    return bfs(grid)
+
+def h4(node): # consistent
+    if node.state.foods_left == 0:
+        return 0.0
+    h = 0.0
+    max_dist_food = 0
+    for food in node.state.foods:
+        dist,elem = bfs_matrix(node.state.grid,food,['$'])
+        if dist > max_dist_food:
+            max_dist_food = dist
+    h = max_dist_food
+    return h
+
+def h5(node): # NON consistent
+    if node.state.foods_left == 0:
+        return 0.0
+    h = 0.0
+    for food in node.state.foods:
+        dist,elem = bfs_matrix(node.state.grid,food,['$'])
+        h+=dist
+   # print(h)
+    return h
+
+def h6(node):# NON consistent mais tres efficace
+    if node.state.foods_left == 0:
+        return 0.0
+    h = 0.0
+    for food in node.state.foods:
+        dist,elem = bfs_matrix(node.state.grid,food,['$','@'])
+        h+=dist
+    #print(h)
+    return h
+
+
 
 #####################
 # Launch the search #
@@ -216,13 +285,16 @@ if __name__ == "__main__":
 
     problem = Pacmen(init_state)
 
-    node = astar_graph_search(problem, h2)
+    node = astar_graph_search(problem, h6)
 
     # example of print
     path = node.path()
     path.reverse()
-
+    ###############
+    #print(problem.nb_explored_nodes)
+    ################
     print('Number of moves: ' + str(node.depth))
     for n in path:
+        #print(h6(n))
         print(n.state)  # assuming that the __str__ function of state outputs the correct format
         print()
